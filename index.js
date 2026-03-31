@@ -24,7 +24,7 @@ const BUTTON_ID = "cargo_ninho";
 
 function criarPainel(guild) {
   const embed = new EmbedBuilder()
-    .setTitle("Painel de Cargos")
+    .setTitle("Escolha seu Cargo")
     .setDescription("Selecione o cargo que deseja no **ERA DOS GIGANTES**.")
     .setColor(0x57F287)
     .setFooter({
@@ -77,6 +77,7 @@ client.once("ready", async () => {
       await channel.send(painel);
       console.log("Novo painel enviado.");
     }
+
   } catch (error) {
     console.error("Erro ao enviar painel:", error);
   }
