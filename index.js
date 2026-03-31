@@ -12,46 +12,41 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.GuildMessages
   ],
   partials: [Partials.Channel]
 });
 
 const TOKEN = process.env.TOKEN;
-
-// IDs
 const CHANNEL_ID = "1488567040615776326";
 const ROLE_ID = "1488562034013638829";
 
-// comando para enviar o painel
-const COMMAND = "!painelninho";
-
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log(`Bot online: ${client.user.tag}`);
-});
 
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (message.content !== COMMAND) return;
+  try {
+    const channel = await client.channels.fetch(CHANNEL_ID);
 
-  const embed = new EmbedBuilder()
-    .setTitle("🪺 Painel de Cargos")
-    .setDescription("Clique no botão abaixo para pegar ou remover o cargo **Ninho**.")
-    .setColor("Green");
+    const embed = new EmbedBuilder()
+      .setTitle("🪺 Painel de Cargos")
+      .setDescription("Clique no botão abaixo para pegar ou remover o cargo **Ninho**.")
+      .setColor("Green");
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("cargo_ninho")
-      .setLabel("NINHO")
-      .setEmoji("🪺")
-      .setStyle(ButtonStyle.Success)
-  );
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("cargo_ninho")
+        .setLabel("NINHO")
+        .setEmoji("🪺")
+        .setStyle(ButtonStyle.Success)
+    );
 
-  await message.channel.send({
-    embeds: [embed],
-    components: [row]
-  });
+    await channel.send({
+      embeds: [embed],
+      components: [row]
+    });
+  } catch (error) {
+    console.error("Erro ao enviar painel:", error);
+  }
 });
 
 client.on("interactionCreate", async (interaction) => {
