@@ -27,21 +27,15 @@ function criarPainel(guild) {
     .setColor("#57F287")
     .setTitle("✨ Painel de Cargos")
     .setDescription([
-      "Selecione abaixo o cargo que deseja receber.",
+      "Escolha abaixo o cargo que deseja receber.",
       "",
-      "> Clique no botão para adicionar ou remover o cargo."
+      "🥚 **NINHO**"
     ].join("\n"))
     .setThumbnail(guild.iconURL({ dynamic: true, size: 512 }))
-    .addFields({
-      name: "🌿 Cargo disponível",
-      value: "🥚 **NINHO**",
-      inline: false
-    })
     .setFooter({
       text: "ERA DOS GIGANTES",
       iconURL: guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL()
-    })
-    .setTimestamp();
+    });
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -115,10 +109,18 @@ client.on("interactionCreate", async (interaction) => {
     }
   } catch (error) {
     console.error("Erro ao alterar cargo:", error);
-    await interaction.reply({
-      content: "⚠️ Não consegui alterar o cargo. Verifique as permissões do bot.",
-      ephemeral: true
-    });
+
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "⚠️ Não consegui alterar o cargo. Verifique as permissões do bot.",
+        ephemeral: true
+      });
+    } else {
+      await interaction.reply({
+        content: "⚠️ Não consegui alterar o cargo. Verifique as permissões do bot.",
+        ephemeral: true
+      });
+    }
   }
 });
 
