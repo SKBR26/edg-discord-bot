@@ -5,7 +5,9 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
-  ButtonStyle
+  ButtonStyle,
+  ChannelType,
+  Events
 } = require("discord.js");
 
 const client = new Client({
@@ -17,25 +19,54 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 
+/*
+|--------------------------------------------------------------------------
+| CONFIGURAÇÕES
+|--------------------------------------------------------------------------
+*/
 const TOKEN = process.env.TOKEN;
+
+// ID do canal onde o painel será enviado
 const CHANNEL_ID = "1488567040615776326";
+
+// ID do cargo que será adicionado/removido
 const ROLE_ID = "1488562034013638829";
+
+// ID interno do botão
 const BUTTON_ID = "cargo_ninho";
 
+/*
+|--------------------------------------------------------------------------
+| FUNÇÃO: CRIAR PAINEL
+|--------------------------------------------------------------------------
+*/
 function criarPainel(guild) {
   const embed = new EmbedBuilder()
-    .setTitle("Painel de Cargos")
-    .setDescription("Clique no cargo desejado.")
-    .setColor("Green")
+    .setColor(0x57f287)
+    .setTitle("📋 Painel de Cargos")
+    .setDescription(
+      [
+        "Selecione abaixo o cargo disponível.",
+        "",
+        "🥚 **Ninho**",
+        "> Clique no botão para **receber** ou **remover** esse cargo.",
+        "",
+        "Use o painel sempre que quiser alterar sua função."
+      ].join("\n")
+    )
+    .setThumbnail(
+      guild.iconURL({ dynamic: true, size: 256 }) ||
+      client.user.displayAvatarURL()
+    )
     .setFooter({
-      text: "ERA DOS GIGANTES",
-      iconURL: guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL()
-    });
+      text: "ERA DOS GIGANTES"
+    })
+    .setTimestamp();
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(BUTTON_ID)
-      .setLabel("NINHO")
+      .setLabel("Pegar / Remover Ninho")
       .setEmoji("🥚")
       .setStyle(ButtonStyle.Success)
   );
@@ -46,13 +77,22 @@ function criarPainel(guild) {
   };
 }
 
-client.once("ready", async () => {
-  console.log(`Bot online: ${client.user.tag}`);
-
+/*
+|--------------------------------------------------------------------------
+| FUNÇÃO: ENVIAR OU ATUALIZAR O PAINEL
+|--------------------------------------------------------------------------
+*/
+async function enviarOuAtualizarPainel() {
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
+
     if (!channel) {
-      console.log("Canal não encontrado.");
+      console.log("❌ Canal não encontrado.");
+      return;
+    }
+
+    if (channel.type !== ChannelType.GuildText) {
+      console.log("❌ O canal informado não é um canal de texto.");
       return;
     }
 
@@ -71,45 +111,120 @@ client.once("ready", async () => {
 
     if (painelExistente) {
       await painelExistente.edit(painel);
-      console.log("Painel existente atualizado.");
+      console.log("✅ Painel existente atualizado.");
     } else {
       await channel.send(painel);
-      console.log("Novo painel enviado.");
+      console.log("✅ Novo painel enviado.");
     }
-
   } catch (error) {
-    console.error("Erro ao enviar painel:", error);
+    console.error("❌ Erro ao enviar/atualizar painel:", error);
   }
+}
+
+/*
+|--------------------------------------------------------------------------
+| EVENTO: BOT PRONTO
+|--------------------------------------------------------------------------
+*/
+client.once(Events.ClientReady, async () => {
+  console.log(`✅ Bot online: ${client.user.tag}`);
+  await enviarOuAtualizarPainel();
 });
 
-client.on("interactionCreate", async (interaction) => {
+/*
+|--------------------------------------------------------------------------
+| EVENTO: INTERAÇÃO COM BOTÃO
+|--------------------------------------------------------------------------
+*/
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isButton()) return;
   if (interaction.customId !== BUTTON_ID) return;
 
-  const member = interaction.member;
-  const hasRole = member.roles.cache.has(ROLE_ID);
-
   try {
-    if (hasRole) {
-      await member.roles.remove(ROLE_ID);
+    const guild = interaction.guild;
+    if (!guild) {
       await interaction.reply({
-        content: "Cargo **Ninho** removido com sucesso.",
+        content: "❌ Este botão só pode ser usado dentro de um servidor.",
+        ephemeral: true
+      });
+      return;
+    }
+
+    const member = await guild.members.fetch(interaction.user.id);
+    const role = await guild.roles.fetch(ROLE_ID);
+
+    if (!role) {
+      await interaction.reply({
+        content: "❌ O cargo configurado não foi encontrado.",
+        ephemeral: true
+      });
+      return;
+    }
+
+    const botMember = await guild.members.fetchMe();
+
+    // Verifica se o bot tem permissão de gerenciar cargos
+    if (!botMember.permissions.has("ManageRoles")) {
+      await interaction.reply({
+        content: "❌ O bot não tem permissão para gerenciar cargos.",
+        ephemeral: true
+      });
+      return;
+    }
+
+    // Verifica se o cargo do bot está acima do cargo que ele vai gerenciar
+    if (role.position >= botMember.roles.highest.position) {
+      await interaction.reply({
+        content:
+          "❌ Não consigo alterar esse cargo porque ele está acima do meu cargo na hierarquia.",
+        ephemeral: true
+      });
+      return;
+    }
+
+    const hasRole = member.roles.cache.has(ROLE_ID);
+
+    if (hasRole) {
+      await member.roles.remove(role);
+
+      await interaction.reply({
+        content: "🗑️ O cargo **Ninho** foi removido com sucesso.",
         ephemeral: true
       });
     } else {
-      await member.roles.add(ROLE_ID);
+      await member.roles.add(role);
+
       await interaction.reply({
-        content: "Cargo **Ninho** adicionado com sucesso.",
+        content: "✨ Você recebeu o cargo **Ninho** com sucesso.",
         ephemeral: true
       });
     }
   } catch (error) {
-    console.error("Erro ao alterar cargo:", error);
-    await interaction.reply({
-      content: "Não consegui alterar o cargo. Verifique as permissões do bot.",
-      ephemeral: true
-    });
+    console.error("❌ Erro ao alterar cargo:", error);
+
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({
+          content:
+            "❌ Não consegui alterar o cargo. Verifique as permissões e a hierarquia do bot.",
+          ephemeral: true
+        });
+      } else {
+        await interaction.reply({
+          content:
+            "❌ Não consegui alterar o cargo. Verifique as permissões e a hierarquia do bot.",
+          ephemeral: true
+        });
+      }
+    } catch (err) {
+      console.error("❌ Erro ao responder interação:", err);
+    }
   }
 });
 
+/*
+|--------------------------------------------------------------------------
+| LOGIN
+|--------------------------------------------------------------------------
+*/
 client.login(TOKEN);
