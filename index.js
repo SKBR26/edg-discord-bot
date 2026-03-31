@@ -24,7 +24,7 @@ const BUTTON_ID = "cargo_ninho";
 
 function criarPainel() {
   const embed = new EmbedBuilder()
-    .setTitle("🥚 Painel de Cargos")
+    .setTitle("Painel de Cargos")
     .setDescription("Clique no cargo desejado.")
     .setColor("Green");
 
@@ -47,11 +47,16 @@ client.once("ready", async () => {
 
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
-    const mensagens = await channel.messages.fetch({ limit: 20 });
+    if (!channel) {
+      console.log("Canal não encontrado.");
+      return;
+    }
 
-    const mensagemPainel = mensagens.find((msg) => {
+    const mensagens = await channel.messages.fetch({ limit: 50 });
+
+    const painelExistente = mensagens.find((msg) => {
       if (msg.author.id !== client.user.id) return false;
-      if (!msg.components?.length) return false;
+      if (!msg.components || msg.components.length === 0) return false;
 
       return msg.components.some((row) =>
         row.components.some((component) => component.customId === BUTTON_ID)
@@ -60,15 +65,15 @@ client.once("ready", async () => {
 
     const painel = criarPainel();
 
-    if (mensagemPainel) {
-      await mensagemPainel.edit(painel);
+    if (painelExistente) {
+      await painelExistente.edit(painel);
       console.log("Painel existente atualizado com sucesso.");
     } else {
       await channel.send(painel);
       console.log("Novo painel enviado com sucesso.");
     }
   } catch (error) {
-    console.error("Erro ao enviar/atualizar painel:", error);
+    console.error("Erro ao enviar ou atualizar painel:", error);
   }
 });
 
@@ -94,7 +99,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao alterar cargo:", error);
     await interaction.reply({
       content: "Não consegui alterar o cargo. Verifique as permissões do bot.",
       ephemeral: true
