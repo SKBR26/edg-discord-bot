@@ -22,15 +22,23 @@ const CHANNEL_ID = "1488567040615776326";
 const ROLE_ID = "1488562034013638829";
 const BUTTON_ID = "cargo_ninho";
 
+/* Coloque aqui o link da logo se quiser usar a imagem no painel */
+const LOGO = "https://i.imgur.com/SEU_LINK_DA_IMAGEM.png";
+
 function criarPainel(guild) {
   const embed = new EmbedBuilder()
-    .setColor("#57F287")
+    .setColor("#1E8E3E") // verde da logo
     .setTitle("Painel de Cargos")
-    .setDescription("Escolha abaixo o cargo que deseja receber.")
-    .setThumbnail(guild.iconURL({ dynamic: true, size: 512 }))
+    .setDescription([
+      "Escolha abaixo o cargo que deseja receber.",
+      "",
+      "────────────────",
+      "**ERA DOS GIGANTES**"
+    ].join("\n"))
+    .setThumbnail(LOGO || guild.iconURL({ dynamic: true, size: 512 }))
     .setFooter({
-      text: "ERA DOS GIGANTES",
-      iconURL: guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL()
+      text: "ERA DOS GIGANTES • Brasil",
+      iconURL: LOGO || guild.iconURL({ dynamic: true })
     });
 
   const row = new ActionRowBuilder().addComponents(
@@ -77,6 +85,7 @@ client.once("ready", async () => {
       await channel.send(painel);
       console.log("Novo painel enviado.");
     }
+
   } catch (error) {
     console.error("Erro ao enviar painel:", error);
   }
