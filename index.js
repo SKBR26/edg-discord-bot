@@ -22,11 +22,15 @@ const CHANNEL_ID = "1488567040615776326";
 const ROLE_ID = "1488562034013638829";
 const BUTTON_ID = "cargo_ninho";
 
-function criarPainel() {
+function criarPainel(guild) {
   const embed = new EmbedBuilder()
     .setTitle("Painel de Cargos")
     .setDescription("Clique no cargo desejado.")
-    .setColor("Green");
+    .setColor("Green")
+    .setFooter({
+      text: "ERA DOS GIGANTES",
+      iconURL: guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL()
+    });
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -52,7 +56,7 @@ client.once("ready", async () => {
       return;
     }
 
-    const mensagens = await channel.messages.fetch({ limit: 50 });
+    const mensagens = await channel.messages.fetch({ limit: 100 });
 
     const painelExistente = mensagens.find((msg) => {
       if (msg.author.id !== client.user.id) return false;
@@ -63,17 +67,18 @@ client.once("ready", async () => {
       );
     });
 
-    const painel = criarPainel();
+    const painel = criarPainel(channel.guild);
 
     if (painelExistente) {
       await painelExistente.edit(painel);
-      console.log("Painel existente atualizado com sucesso.");
+      console.log("Painel existente atualizado.");
     } else {
       await channel.send(painel);
-      console.log("Novo painel enviado com sucesso.");
+      console.log("Novo painel enviado.");
     }
+
   } catch (error) {
-    console.error("Erro ao enviar ou atualizar painel:", error);
+    console.error("Erro ao enviar painel:", error);
   }
 });
 
