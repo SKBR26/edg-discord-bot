@@ -25,8 +25,8 @@ const BUTTON_ID = "cargo_ninho";
 function criarPainel(guild) {
   const embed = new EmbedBuilder()
     .setTitle("Painel de Cargos")
-    .setDescription("Clique no cargo desejado.")
-    .setColor("Green")
+    .setDescription("Selecione o cargo que deseja no **ERA DOS GIGANTES**.")
+    .setColor(0x57F287)
     .setFooter({
       text: "ERA DOS GIGANTES",
       iconURL: guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL()
@@ -51,6 +51,7 @@ client.once("ready", async () => {
 
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
+
     if (!channel) {
       console.log("Canal não encontrado.");
       return;
@@ -76,7 +77,6 @@ client.once("ready", async () => {
       await channel.send(painel);
       console.log("Novo painel enviado.");
     }
-
   } catch (error) {
     console.error("Erro ao enviar painel:", error);
   }
@@ -105,10 +105,13 @@ client.on("interactionCreate", async (interaction) => {
     }
   } catch (error) {
     console.error("Erro ao alterar cargo:", error);
-    await interaction.reply({
-      content: "Não consegui alterar o cargo. Verifique as permissões do bot.",
-      ephemeral: true
-    });
+
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        content: "Não consegui alterar o cargo. Verifique as permissões do bot.",
+        ephemeral: true
+      });
+    }
   }
 });
 
