@@ -25,12 +25,8 @@ const BUTTON_ID = "cargo_ninho";
 function criarPainel(guild) {
   const embed = new EmbedBuilder()
     .setColor("#57F287")
-    .setTitle("✨ Painel de Cargos")
-    .setDescription([
-      "Escolha abaixo o cargo que deseja receber.",
-      "",
-      "🥚 **NINHO**"
-    ].join("\n"))
+    .setTitle("Painel de Cargos")
+    .setDescription("Escolha abaixo o cargo que deseja receber.")
     .setThumbnail(guild.iconURL({ dynamic: true, size: 512 }))
     .setFooter({
       text: "ERA DOS GIGANTES",
@@ -97,30 +93,22 @@ client.on("interactionCreate", async (interaction) => {
     if (hasRole) {
       await member.roles.remove(ROLE_ID);
       await interaction.reply({
-        content: "❌ Cargo **Ninho** removido com sucesso.",
+        content: "Cargo **Ninho** removido com sucesso.",
         ephemeral: true
       });
     } else {
       await member.roles.add(ROLE_ID);
       await interaction.reply({
-        content: "✅ Cargo **Ninho** adicionado com sucesso.",
+        content: "Cargo **Ninho** adicionado com sucesso.",
         ephemeral: true
       });
     }
   } catch (error) {
     console.error("Erro ao alterar cargo:", error);
-
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: "⚠️ Não consegui alterar o cargo. Verifique as permissões do bot.",
-        ephemeral: true
-      });
-    } else {
-      await interaction.reply({
-        content: "⚠️ Não consegui alterar o cargo. Verifique as permissões do bot.",
-        ephemeral: true
-      });
-    }
+    await interaction.reply({
+      content: "Não consegui alterar o cargo. Verifique as permissões do bot.",
+      ephemeral: true
+    });
   }
 });
 
