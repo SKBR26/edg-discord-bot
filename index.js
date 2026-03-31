@@ -44,6 +44,8 @@ client.once("ready", async () => {
       embeds: [embed],
       components: [row]
     });
+
+    console.log("Painel enviado com sucesso.");
   } catch (error) {
     console.error("Erro ao enviar painel:", error);
   }
