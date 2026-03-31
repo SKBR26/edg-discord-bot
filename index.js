@@ -28,15 +28,15 @@ client.once("ready", async () => {
     const channel = await client.channels.fetch(CHANNEL_ID);
 
     const embed = new EmbedBuilder()
-      .setTitle("🪺 Painel de Cargos")
-      .setDescription("Clique no botão abaixo para pegar ou remover o cargo **Ninho**.")
+      .setTitle("🥚 Painel de Cargos")
+      .setDescription("Clique no cargo desejado.")
       .setColor("Green");
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("cargo_ninho")
         .setLabel("NINHO")
-        .setEmoji("🪺")
+        .setEmoji("🥚")
         .setStyle(ButtonStyle.Success)
     );
 
