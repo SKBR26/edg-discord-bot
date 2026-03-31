@@ -18,7 +18,7 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 
-const TOKEN = "SEU_TOKEN_REAL_AQUI";
+const TOKEN = process.env.TOKEN;
 
 // IDs
 const CHANNEL_ID = "1488567040615776326";
