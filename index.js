@@ -24,13 +24,24 @@ const BUTTON_ID = "cargo_ninho";
 
 function criarPainel(guild) {
   const embed = new EmbedBuilder()
-    .setTitle("Painel de Cargos")
-    .setDescription("Clique no cargo desejado.")
-    .setColor("Green")
+    .setColor("#57F287")
+    .setTitle("✨ Painel de Cargos")
+    .setDescription([
+      "Selecione abaixo o cargo que deseja receber.",
+      "",
+      "> Clique no botão para adicionar ou remover o cargo."
+    ].join("\n"))
+    .setThumbnail(guild.iconURL({ dynamic: true, size: 512 }))
+    .addFields({
+      name: "🌿 Cargo disponível",
+      value: "🥚 **NINHO**",
+      inline: false
+    })
     .setFooter({
       text: "ERA DOS GIGANTES",
       iconURL: guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL()
-    });
+    })
+    .setTimestamp();
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -76,7 +87,6 @@ client.once("ready", async () => {
       await channel.send(painel);
       console.log("Novo painel enviado.");
     }
-
   } catch (error) {
     console.error("Erro ao enviar painel:", error);
   }
@@ -93,20 +103,20 @@ client.on("interactionCreate", async (interaction) => {
     if (hasRole) {
       await member.roles.remove(ROLE_ID);
       await interaction.reply({
-        content: "Cargo **Ninho** removido com sucesso.",
+        content: "❌ Cargo **Ninho** removido com sucesso.",
         ephemeral: true
       });
     } else {
       await member.roles.add(ROLE_ID);
       await interaction.reply({
-        content: "Cargo **Ninho** adicionado com sucesso.",
+        content: "✅ Cargo **Ninho** adicionado com sucesso.",
         ephemeral: true
       });
     }
   } catch (error) {
     console.error("Erro ao alterar cargo:", error);
     await interaction.reply({
-      content: "Não consegui alterar o cargo. Verifique as permissões do bot.",
+      content: "⚠️ Não consegui alterar o cargo. Verifique as permissões do bot.",
       ephemeral: true
     });
   }
